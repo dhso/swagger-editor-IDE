@@ -91,7 +91,7 @@
 		if (updating) {
 			if (!weak) {
 				new Notification("Swagger Editor", {
-					body: '正在下载更新，请耐心等待！'
+					body: 'Downloading, please waiting...'
 				})
 			}
 			return;
@@ -100,21 +100,21 @@
 		_httpGet(localConfig.server + localConfig.version + '/' + 'package.json', function(data) {
 			remoteConfig = JSON.parse(data);
 			if (remoteConfig.manifest && remoteConfig.manifest[0] && remoteConfig.manifest[0].version && _compareVersion(remoteConfig.manifest[0].version, localConfig.version)) {
-				let detail = '本次更新如下:\n\n';
+				let detail = 'Update detail:\n\n';
 				remoteConfig.manifest[0].detail.forEach(function(ele) {
 					detail += ele + '\n';
 				});
-				detail += '\n点击 [OK] 更新';
+				detail += '\nClick [OK] to upgrade.';
 				if (confirm(detail)) {
 					_updateFiles(remoteConfig.manifest[0].files);
 					new Notification("Swagger Editor", {
-						body: '开始下载更新，请不要退出！'
+						body: 'Start to download, do not quit！'
 					})
 				}
 			} else {
 				if (!weak) {
 					new Notification("Swagger Editor", {
-						body: '当前已是最新版本！'
+						body: 'This is the newest version！'
 					})
 				}
 			}
@@ -197,7 +197,7 @@
 		if (changeFilesOk && removeFilesOk) {
 			updating = false;
 			new Notification("Swagger Editor", {
-				body: '更新成功，请重新打开 Swagger Editor !'
+				body: 'Upgrade successed，please reopen the Swagger Editor !'
 			})
 		}
 	}

@@ -1,6 +1,6 @@
 {
   "name": "SwaggerEditor",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A Electron Swagger Editor Application",
   "main": "js/main.js",
   "scripts": {
@@ -26,6 +26,12 @@
   },
   "server": "http://120.27.39.174/swagger_editor/",
   "manifest": [{
+    "version": "2.1.1",
+    "files": {
+      "change": ["js/renderer.js", "package.json"]
+    },
+    "detail": ["change language to english"]
+  }, {
     "version": "2.1.0",
     "files": {
       "change": ["js/renderer.js", "js/main.js", "page/dist/swagger-editor-bundle.js", "page/dist/swagger-editor-standalone-preset.js", "page/dist/swagger-editor.css", "page/dist/swagger-editor.js", "page/dist/validation.worker.js", "package.json"],
