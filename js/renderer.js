@@ -6,8 +6,7 @@
 	const path = require('path');
 	const url = require('url');
 	const http = require('http');
-	let changeFilesOk = true;
-	let removeFilesOk = true;
+	const unzip = require('unzip2');
 	let updating = false;
 	let localConfig = {};
 	let remoteConfig = {};
@@ -75,6 +74,24 @@
 		}
 	}
 
+	function _rmFile(file, callback) {
+		fs.exists(file, function(exists) {
+			if (exists) {
+				fs.unlink(file, function(err) {
+					callback();
+				});
+			}
+		});
+	}
+
+	function _rmFileSync(file) {
+		fs.exists(file, function(exists) {
+			if (exists) {
+				fs.unlinkSync(file);
+			}
+		});
+	}
+
 	ipcRenderer.on('menu:save', function() {
 		window.saveFile();
 	});
@@ -97,16 +114,16 @@
 			return;
 		}
 		localConfig = JSON.parse(_readFileSync(path.join(__dirname, '../package.json'), "utf-8"));
-		_httpGet(localConfig.server + localConfig.version + '/' + 'package.json', function(data) {
+		_httpGet(localConfig.server + localConfig.version + '/' + 'update.json', function(data) {
 			remoteConfig = JSON.parse(data);
-			if (remoteConfig.manifest && remoteConfig.manifest[0] && remoteConfig.manifest[0].version && _compareVersion(remoteConfig.manifest[0].version, localConfig.version)) {
+			if (remoteConfig.length > 0 && remoteConfig[0].version && _compareVersion(remoteConfig[0].version, localConfig.version)) {
 				let detail = 'Update detail:\n\n';
-				remoteConfig.manifest[0].detail.forEach(function(ele) {
+				remoteConfig[0].detail.forEach(function(ele) {
 					detail += ele + '\n';
 				});
 				detail += '\nClick [OK] to upgrade.';
 				if (confirm(detail)) {
-					_updateFiles(remoteConfig.manifest[0].files);
+					_upgrade(localConfig.server + localConfig.version + '/' + 'update.zip');
 					new Notification("Swagger Editor", {
 						body: 'Start to download, do not quit！'
 					})
@@ -121,85 +138,15 @@
 		});
 	}
 
-
-	function _updateFiles(files) {
+	function _upgrade(url) {
 		updating = true;
-		_downloadFiles(files.change || []);
-		_removeFiles(files.remove || []);
-	}
-
-	function _downloadFiles(files) {
-		if (files && files.length > 0) {
-			changeFilesOk = false;
-		}
-		fs.exists(path.join(__dirname, '../download'), function(exists) {
-			let _files = [].concat(files);
-			files.forEach(function(file) {
-				_httpGet(localConfig.server + remoteConfig.manifest[0].version + '/' + file, function(data) {
-					console.log('download:', file);
-					_mkdirsSync(path.dirname(path.join(__dirname, '../download/', file)));
-					_writeFileSync(path.join(__dirname, '../download/', file), data);
-					let index = _files.indexOf(file);
-					if (index > -1) {
-						_files.splice(index, 1);
-					}
-					if (_files.length < 1) {
-						console.log('download:', true);
-						_changeFiles(files);
-					}
-				});
+		_httpDownload(url, path.join(__dirname, '../download/update.zip'), function() {
+			_unzipFile(path.join(__dirname, '../download/update.zip'), function() {
+				new Notification("Swagger Editor", {
+					body: 'Upgrade successed，please reopen the Swagger Editor !'
+				})
 			});
 		});
-	}
-
-	function _changeFiles(files) {
-		let _files = [].concat(files);
-		files.forEach(function(file) {
-			console.log('change:', file);
-			let data = _readFileSync(path.join(__dirname, '../download/', file));
-			_mkdirsSync(path.dirname(path.join(__dirname, '../', file)));
-			_writeFileSync(path.join(__dirname, '../', file), data);
-			let index = _files.indexOf(file);
-			if (index > -1) {
-				_files.splice(index, 1);
-			}
-			if (_files.length < 1) {
-				changeFilesOk = true;
-				console.log('change:', changeFilesOk);
-				_checkUpdateSuccess();
-			}
-		});
-	}
-
-	function _removeFiles(files) {
-		if (files && files.length > 0) {
-			removeFilesOk = false;
-		}
-		let _files = [].concat(files);
-		files.forEach(function(file) {
-			fs.unlink(path.join(__dirname, '../', file), function(err) {
-				console.log('remove:', file);
-				if (err) console.log(err);
-				let index = _files.indexOf(file);
-				if (index > -1) {
-					_files.splice(index, 1);
-				}
-				if (_files.length < 1) {
-					removeFilesOk = true;
-					console.log('remove:', removeFilesOk);
-					_checkUpdateSuccess();
-				}
-			});
-		});
-	}
-
-	function _checkUpdateSuccess() {
-		if (changeFilesOk && removeFilesOk) {
-			updating = false;
-			new Notification("Swagger Editor", {
-				body: 'Upgrade successed，please reopen the Swagger Editor !'
-			})
-		}
 	}
 
 	function _compareVersion(curV, reqV) {
@@ -234,6 +181,35 @@
 			});
 		}).on('error', function(e) {
 			console.log("Got error: " + e.message);
+		});
+	}
+
+	function _httpDownload(url, localPath, callback) {
+		_mkdirsSync(path.join(localPath, '../'));
+		let file = fs.createWriteStream(localPath);
+		http.get(url, function(res) {
+			console.log('downloading:', url);
+			res.on("data", function(data) {
+				file.write(data);
+			});
+			res.on("end", function() {
+				file.end();
+				console.log('downloaded:', url);
+				callback();
+			});
+		}).on('error', function(e) {
+			console.log("Got error: " + e.message);
+		});
+	}
+
+	function _unzipFile(file, callback) {
+		console.log('unziping:', file);
+		fs.createReadStream(file).pipe(unzip.Extract({
+			path: path.join(__dirname, '../')
+		})).on('close', function() {
+			updating = false;
+			console.log('unziped:', file);
+			callback();
 		});
 	}
 

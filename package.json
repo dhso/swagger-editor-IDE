@@ -1,14 +1,14 @@
 {
   "name": "SwaggerEditor",
-  "version": "2.1.1",
+  "version": "2.3.1",
   "description": "A Electron Swagger Editor Application",
   "main": "js/main.js",
   "scripts": {
     "start": "electron .",
-    "package-mac": "electron-packager ./ --platform=darwin --arch=x64 --overwrite --icon ./img/icon.icns --out ./dist-package --ignore=dist-package --ignore=node_modules --ignore=page/node_modules --ignore=page/build-tools --ignore=page/dev-helpers --ignore=page/src --ignore=page/swagger-editor-dist-package --ignore=page/test",
-    "package-win": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --icon ./img/icon.ico --out ./dist-package --prune --ignore=dist-package --ignore=node_modules --ignore=page/node_modules --ignore=page/build-tools --ignore=page/dev-helpers --ignore=page/src --ignore=page/swagger-editor-dist-package --ignore=page/test"
+    "package-mac": "electron-packager ./ --platform=darwin --arch=x64 --overwrite --icon ./img/icon.icns --out ./dist-package --ignore=dist-package  --ignore=page/node_modules --ignore=page/build-tools --ignore=page/dev-helpers --ignore=page/src --ignore=page/swagger-editor-dist-package --ignore=page/test",
+    "package-win": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --icon ./img/icon.ico --out ./dist-package --ignore=dist-package --ignore=page/node_modules --ignore=page/build-tools --ignore=page/dev-helpers --ignore=page/src --ignore=page/swagger-editor-dist-package --ignore=page/test"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/dhso/swagger-editor-IDE.git",
   "keywords": [
     "Electron",
     "quick",
@@ -25,26 +25,7 @@
     "electron-packager": "^9.1.0"
   },
   "server": "http://120.27.39.174/swagger_editor/",
-  "manifest": [{
-    "version": "2.1.1",
-    "files": {
-      "change": ["js/renderer.js", "package.json"]
-    },
-    "detail": ["change language to english"]
-  }, {
-    "version": "2.1.0",
-    "files": {
-      "change": ["js/renderer.js", "js/main.js", "page/dist/swagger-editor-bundle.js", "page/dist/swagger-editor-standalone-preset.js", "page/dist/swagger-editor.css", "page/dist/swagger-editor.js", "page/dist/validation.worker.js", "package.json"],
-      "remove": ["LICENSE.md"]
-    },
-    "detail": ["细节优化", "提高稳定性"]
-  }, {
-    "version": "1.2.0",
-    "files": ["js/renderer.js", "js/main.js", "package.json"],
-    "detail": ["【新增】更新时删除无效文件", "修改一些BUG", "自动检测更新", "检测更新提示优化"]
-  }, {
-    "version": "1.1.0",
-    "files": ["package.json"],
-    "detail": ["【新增】自动更新功能"]
-  }]
+  "dependencies": {
+    "unzip": "^0.1.11"
+  }
 }
