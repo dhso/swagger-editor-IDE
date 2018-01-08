@@ -10,11 +10,7 @@
   },
   "repository": "https://github.com/dhso/swagger-editor-IDE.git",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "Electron"
   ],
   "author": "Hadong",
   "license": "CC0-1.0",
